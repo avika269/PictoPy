@@ -2,6 +2,16 @@ import React, { useState } from 'react';
 import { Settings as SettingsIcon, RefreshCw, Users } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import UpdateDialog from '@/components/Updater/UpdateDialog';
 import SettingsCard from './SettingsCard';
 
@@ -31,6 +41,7 @@ const ApplicationControlsCard: React.FC = () => {
   } = useUpdater();
 
   const [updateDialogOpen, setUpdateDialogOpen] = useState<boolean>(false);
+  const [reclusterDialogOpen, setReclusterDialogOpen] = useState<boolean>(false);
 
   const reclusterMutation = usePictoMutation({
     mutationFn: triggerGlobalReclustering,
@@ -73,9 +84,8 @@ const ApplicationControlsCard: React.FC = () => {
   useMutationFeedback(reclusterMutation, feedbackOptions);
 
   const onGlobalReclusterClick = () => {
-    reclusterMutation.mutate(undefined);
-  };
-
+  setReclusterDialogOpen(true);
+};
   const onCheckUpdatesClick = () => {
     const checkUpdates = async () => {
       dispatch(showLoader('Checking for updates...'));
@@ -160,6 +170,40 @@ const ApplicationControlsCard: React.FC = () => {
           </Button>
         </div>
       </SettingsCard>
+
+            <AlertDialog
+        open={reclusterDialogOpen}
+        onOpenChange={setReclusterDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Start Global Reclustering?
+            </AlertDialogTitle>
+
+            <AlertDialogDescription>
+              This process will rebuild all face clusters from scratch. It may
+              take a significant amount of time and system resources. Are you
+              sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              Cancel
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={() => {
+                setReclusterDialogOpen(false);
+                reclusterMutation.mutate(undefined);
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <UpdateDialog
         update={updateAvailable}
